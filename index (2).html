@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Digital Card Generator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">◆</span>
+      <span class="brand-name">CardForge</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="dashboard">Tableau de bord</button>
+      <button class="nav-item" data-view="cards">Mes cartes</button>
+      <button class="nav-item" data-view="create">Créer une carte</button>
+      <button class="nav-item" data-view="templates">Modèles</button>
+      <button class="nav-item" data-view="settings">Paramètres</button>
+    </nav>
+    <div class="sidebar-foot">
+      <button id="btn-export-all" class="ghost-btn small">Exporter mes profils</button>
+      <button id="btn-import-all" class="ghost-btn small">Importer mes profils</button>
+      <input type="file" id="import-file-input" accept="application/json" hidden>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD VIEW -->
+    <section class="view" id="view-dashboard">
+      <header class="view-header">
+        <h1>Tableau de bord</h1>
+        <p class="sub">Vue d'ensemble de vos cartes de visite digitales.</p>
+      </header>
+      <div class="stat-row">
+        <div class="stat-card">
+          <span class="stat-num" id="stat-total">0</span>
+          <span class="stat-label">Profils créés</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-num" id="stat-socials">0</span>
+          <span class="stat-label">Liens sociaux configurés</span>
+        </div>
+      </div>
+      <div class="dashboard-grid" id="dashboard-cards-grid"></div>
+      <button class="primary-btn" id="dash-new-card">+ Créer une nouvelle carte digitale</button>
+    </section>
+
+    <!-- CARDS LIST VIEW -->
+    <section class="view" id="view-cards" hidden>
+      <header class="view-header">
+        <h1>Mes cartes</h1>
+        <p class="sub">Gérez, dupliquez ou supprimez vos profils.</p>
+      </header>
+      <div class="profiles-list" id="profiles-list"></div>
+    </section>
+
+    <!-- TEMPLATES VIEW -->
+    <section class="view" id="view-templates" hidden>
+      <header class="view-header">
+        <h1>Modèles</h1>
+        <p class="sub">Partez d'un style prêt à l'emploi.</p>
+      </header>
+      <div class="template-grid" id="template-grid"></div>
+    </section>
+
+    <!-- SETTINGS VIEW -->
+    <section class="view" id="view-settings" hidden>
+      <header class="view-header">
+        <h1>Paramètres</h1>
+        <p class="sub">Préférences de l'outil.</p>
+      </header>
+      <div class="settings-block">
+        <p>CardForge fonctionne entièrement dans votre navigateur. Aucune donnée n'est envoyée vers un serveur — tout est stocké localement via <code>localStorage</code>.</p>
+        <button class="ghost-btn danger" id="btn-clear-all">Effacer tous les profils</button>
+      </div>
+    </section>
+
+    <!-- CREATE / EDIT VIEW -->
+    <section class="view" id="view-create" hidden>
+      <header class="view-header">
+        <h1>Créer une nouvelle carte digitale</h1>
+        <p class="sub">Remplissez les informations à gauche, l'aperçu se met à jour en direct à droite.</p>
+      </header>
+
+      <div class="editor-grid">
+
+        <!-- FORM COLUMN -->
+        <form class="form-col" id="card-form" novalidate>
+
+          <div class="field-group">
+            <h3>Informations principales</h3>
+            <label>Nom complet
+              <input type="text" id="f-name" placeholder="Yasmine El Amrani" required>
+            </label>
+            <label>Fonction / Poste
+              <input type="text" id="f-role" placeholder="Directrice Marketing">
+            </label>
+            <label>Nom de l'entreprise
+              <input type="text" id="f-company" placeholder="Atlas Digital">
+            </label>
+            <label>Description courte
+              <textarea id="f-bio" rows="3" placeholder="Une phrase qui vous présente."></textarea>
+            </label>
+            <div class="two-col">
+              <label>Photo de profil
+                <input type="file" id="f-photo" accept="image/*">
+              </label>
+              <label>Logo de l'entreprise
+                <input type="file" id="f-logo" accept="image/*">
+              </label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <h3>Contact</h3>
+            <label>Téléphone
+              <input type="tel" id="f-phone" placeholder="+212 6 00 00 00 00">
+              <span class="field-error" id="err-phone"></span>
+            </label>
+            <label>WhatsApp
+              <input type="tel" id="f-whatsapp" placeholder="+212 6 00 00 00 00">
+              <span class="field-error" id="err-whatsapp"></span>
+            </label>
+            <label>Email
+              <input type="email" id="f-email" placeholder="contact@exemple.com">
+              <span class="field-error" id="err-email"></span>
+            </label>
+            <label>Adresse
+              <input type="text" id="f-address" placeholder="Casablanca, Maroc">
+            </label>
+            <label>Site web
+              <input type="url" id="f-website" placeholder="https://exemple.com">
+              <span class="field-error" id="err-website"></span>
+            </label>
+          </div>
+
+          <div class="field-group">
+            <h3>Réseaux sociaux</h3>
+            <div id="socials-fixed"></div>
+            <div id="socials-custom"></div>
+            <button type="button" class="ghost-btn small" id="btn-add-social">+ Ajouter un réseau social</button>
+          </div>
+
+          <div class="field-group">
+            <h3>Thème</h3>
+            <div class="theme-swatches" id="theme-swatches"></div>
+            <div class="custom-theme" id="custom-theme-block" hidden>
+              <label>Couleur principale <input type="color" id="f-color-primary"></label>
+              <label>Couleur secondaire <input type="color" id="f-color-secondary"></label>
+              <label>Couleur du texte <input type="color" id="f-color-text"></label>
+              <label>Couleur de fond <input type="color" id="f-color-bg"></label>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <h3>Personnalisation avancée</h3>
+            <div class="two-col">
+              <label>Police
+                <select id="f-font">
+                  <option value="system">Système (par défaut)</option>
+                  <option value="serif">Serif élégant</option>
+                  <option value="mono">Mono technique</option>
+                </select>
+              </label>
+              <label>Taille du texte
+                <select id="f-textsize">
+                  <option value="sm">Compacte</option>
+                  <option value="md" selected>Normale</option>
+                  <option value="lg">Grande</option>
+                </select>
+              </label>
+            </div>
+            <div class="two-col">
+              <label>Style des boutons
+                <select id="f-btnstyle">
+                  <option value="filled">Plein</option>
+                  <option value="outline">Contour</option>
+                  <option value="soft">Doux (fond léger)</option>
+                </select>
+              </label>
+              <label>Forme des boutons
+                <select id="f-btnshape">
+                  <option value="round">Arrondie</option>
+                  <option value="pill">Pilule</option>
+                  <option value="square">Carrée</option>
+                </select>
+              </label>
+            </div>
+            <div class="two-col">
+              <label>Position de la photo
+                <select id="f-photopos">
+                  <option value="center">Centrée</option>
+                  <option value="left">Gauche</option>
+                  <option value="banner">Bannière</option>
+                </select>
+              </label>
+              <label>Style de la carte
+                <select id="f-cardstyle">
+                  <option value="elevated">Élevée (ombre)</option>
+                  <option value="flat">Plate</option>
+                  <option value="bordered">Bordure fine</option>
+                </select>
+              </label>
+            </div>
+            <label>Image de fond (optionnelle)
+              <input type="file" id="f-bgimage" accept="image/*">
+            </label>
+          </div>
+
+        </form>
+
+        <!-- PREVIEW COLUMN -->
+        <div class="preview-col">
+          <div class="preview-toolbar">
+            <span class="preview-label">Aperçu en direct</span>
+            <button type="button" class="ghost-btn small" id="btn-fullscreen">Voir en plein écran</button>
+          </div>
+          <div class="card-render" id="card-render"></div>
+
+          <div class="action-row">
+            <button type="button" class="primary-btn" id="btn-save-profile">Créer la carte</button>
+            <button type="button" class="ghost-btn" id="btn-download-html">Télécharger HTML</button>
+            <button type="button" class="ghost-btn" id="btn-download-vcf">Télécharger VCard</button>
+            <button type="button" class="ghost-btn" id="btn-copy-link">Copier le lien</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- FULLSCREEN PREVIEW MODAL -->
+<div class="modal-overlay" id="fullscreen-modal" hidden>
+  <div class="modal-phone">
+    <button class="modal-close" id="close-fullscreen">✕</button>
+    <div class="card-render large" id="card-render-fullscreen"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="script.js"></script>
+</body>
+</html>
